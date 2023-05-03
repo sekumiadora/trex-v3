@@ -1,17 +1,29 @@
 var score = 0;
+var trex_running, trex_colidindo;
 var cacto, gameover, gameoverImage, reseta,resetaImage;
 var grupo;
 var grupo_de_cakitos;
-var play = 1, fim = 0, inicia = 2;
-var estado = play
+
+var PLAY = 1;
+var FIM = 0;
+
+var estadoJogo = PLAY;
+
+
 var cloudImage;
 var groundImage;
 var cactoImage, cactoImage1, cactoImage2, cactoImage3, cactoImage4, cactoImage5, cactoImage6;
+
 function preload() {
   trex_running = loadAnimation("imagi/trex1.png", "imagi/trex3.png", "imagi/trex4.png");
+  //tex colidindo
+  trex_colidindo = loadAnimation("imagi/trex_collided.png");
+
   gameoverImage = loadImage("imagi/gameOver.png");
   resetaImage = loadImage("imagi/restart.png");
+
   groundImage = loadImage("imagi/ground2.png");
+
   cloudImage = loadImage("imagi/cloud.png");
   cactoImage1 = loadImage("imagi/obstacle1.png");
   cactoImage2 = loadImage("imagi/obstacle2.png");
@@ -19,32 +31,36 @@ function preload() {
   cactoImage4 = loadImage("imagi/obstacle4.png");
   cactoImage5 = loadImage("imagi/obstacle5.png");
   cactoImage6 = loadImage("imagi/obstacle6.png");
+  
 }
 
 function setup() {
   createCanvas(1000, 200);
 
-  trex = createSprite(50, 160, 20, 50);
-  trex.addAnimation("running", trex_running);
-  trex.scale = 0.5;
+  
   edges = createEdgeSprites();
-
-  grupo_de_cakitos = createGroup();
-
-
 
   ground = createSprite(200, 180, 400, 20);
   ground.addImage("ground", groundImage);
   ground.x = ground.width / 2;
+  
+  
+  trex = createSprite(50, 160, 20, 50);
+  trex.addAnimation("trex correndo", trex_running);
+  //adicionar outra animação do trex aqui
+
+  trex.scale = 0.5;
 
 
   inviibleGround = createSprite(200, 190, 400, 10);
   inviibleGround.visible = false;
+
+  grupo_de_cakitos = createGroup();
   
   gameover = createSprite(500,100);
   gameover.addImage( gameoverImage);
   gameover.visible = false;
-
+  
   reseta = createSprite(500,170);
   reseta.addImage( resetaImage )
   reseta.visible = false;
@@ -53,9 +69,13 @@ function setup() {
 function draw() {
   background("white");
 
-  if (estado === "play") {
+  //o estadoJogo do jogo tem que estar como o nome da variável, e não texto, sendo assim, sem "":
+  if (estadoJogo === PLAY) {
+
+    ground.velocityX = -3;
+
     score = score + Math.round(frameCount % 05 === 0);
-    ground.velocityX = -2;
+   
     if (keyDown("space") && trex.y >= 161) {
       trex.velocityY = -12;
     }
@@ -66,39 +86,37 @@ function draw() {
       ground.x = ground.width / 2;
     }
 
+    //Gerar cactos e nuvens apenas em play
+    spawnClouds();
+    cakitos();
+
+    //Momento em que estado do jogo Muda
     if (grupo_de_cakitos.isTouching(trex)) {
-      estado == "fim"
+      //estadoJogo do jogo variável, sem aspas
+      estadoJogo = FIM;
       reseta.visible = true;
       gameover.visible = true;
       
     }
-  } else if (estado == fim) {
+
+  } 
+  else if (estadoJogo == FIM) {
+    //se o estadoJogo for FIM para o chão
+    ground.velocityX = 0;
+    
+    //parar os objetos do jogo
+    grupo_de_cakitos.setVelocityXEach(0);
 
   }
-
-
-
 
 
   textSize(20);
   text("score : " + score, 850, 100);
 
 
-
-  //console.log(ground.x);
-
-  //console.log(trex.y);
-
-
-
-
-
   trex.collide(inviibleGround);
   //trex.collide(ground);
-  reset();
-  spawnClouds();
-  cakitos();
-
+ 
   drawSprites();
 }
 function spawnClouds() {
@@ -140,8 +158,10 @@ function cakitos() {
 
 }
 
+//função para resetar o jogo
 function reset(){
-  trex.addAnimation("running", trex_running);
+  
+  
 }
 
 
